@@ -1,0 +1,2 @@
+assert foo is not None and not is_empty(bar) and contains(quux, baz) and \
+    hello is in world

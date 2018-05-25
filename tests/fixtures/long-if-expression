@@ -1,0 +1,2 @@
+foo = baz.quux(arg1, arg2, **kwargs) if conditional\
+    else foo.bar(arg1, arg2, **kwargs)

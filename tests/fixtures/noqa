@@ -1,0 +1,9 @@
+import bar
+import baz
+import world
+
+foo = bar and \
+    baz  # noqa
+
+hello = \
+    world  # noqa: C092
