@@ -17,10 +17,13 @@
 # stdlib imports
 import setuptools
 
+with open('VERSION', 'r') as f:
+    VERSION = f.readline().strip()
+
 setuptools.setup(
     name='flake8-continuation',
     license='MIT',
-    version='0.1.1',
+    version=VERSION,
     install_requires=['flake8'],
     provides=['flake8_continuation'],
     py_modules=['flake8_continuation'],
