@@ -17,13 +17,21 @@
 # stdlib imports
 import setuptools
 
-with open('VERSION', 'r') as f:
-    VERSION = f.readline().strip()
+
+def get_long_description():
+    with open('README.md', 'r') as f:
+        return f.read()
+
+def get_version():
+    with open('VERSION', 'r') as f:
+        return f.readline().strip()
 
 setuptools.setup(
     name='flake8-continuation',
-    license='MIT',
-    version=VERSION,
+    description='Flake8 Line Continuation Plugin',
+    long_description=get_long_description(),
+    license='Apache 2.0',
+    version=get_version(),
     install_requires=['flake8'],
     provides=['flake8_continuation'],
     py_modules=['flake8_continuation'],
