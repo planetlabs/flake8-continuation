@@ -20,23 +20,26 @@ import tokenize
 # third-party imports
 import pkg_resources
 import pycodestyle
+import six
 
-__version__ = pkg_resources.get_distribution('flake8-continuation').version
+__version__ = pkg_resources.get_distribution("flake8-continuation").version
 
-STDINS = {'stdin', '-', '(none)', None}
+STDINS = {"stdin", "-", "(none)", None}
 
-ERROR_CODE = 'C092'
-ERROR_MESSAGE = ('prefer implied line continuation inside parentheses, '
-                 'brackets, and braces as opposed to a backslash')
+ERROR_CODE = "C092"
+ERROR_MESSAGE = (
+    "prefer implied line continuation inside parentheses, "
+    "brackets, and braces as opposed to a backslash"
+)
 
 
 class ContinuationPlugin(object):
     """Checker for invalid line continuations."""
 
-    name = 'flake8-continuation'
+    name = "flake8-continuation"
     version = __version__
 
-    def __init__(self, tree, filename='(none)'):
+    def __init__(self, tree, filename="(none)"):
         """Create the plugin and split the file into lines if needed."""
         self.tree = tree
         self.filename = filename
@@ -46,9 +49,9 @@ class ContinuationPlugin(object):
         """Run and return errors."""
         for error in check_errors(self.lines):
             yield (
-                error.get('line'),
-                error.get('col'),
-                error.get('message'),
+                error.get("line"),
+                error.get("col"),
+                error.get("message"),
                 type(self),
             )
 
@@ -56,14 +59,15 @@ class ContinuationPlugin(object):
 def check_errors(lines):
     """Find and yield continuation errors in the source lines."""
     noqa_rows = get_noqa_line_numbers(lines)
-    for i, line in enumerate(strip_comments(lines)):
+    stripped = strip_docstrings(strip_comments(lines))
+    for i, line in enumerate(stripped):
         end_row = i + 1
         if has_bad_continuation(line) and end_row not in noqa_rows:
             end_col = len(line)
             yield {
-                'message': '{0} {1}'.format(ERROR_CODE, ERROR_MESSAGE),
-                'line': end_row,
-                'col': end_col
+                "message": "{0} {1}".format(ERROR_CODE, ERROR_MESSAGE),
+                "line": end_row,
+                "col": end_col,
             }
 
 
@@ -84,15 +88,20 @@ def get_noqa_line_numbers(lines):
 def has_bad_continuation(line):
     """Tell whether or not a non-comment line is bad."""
     stripped = line.strip()
-    return (stripped.endswith('\\') and
-            not (stripped.startswith('assert') or stripped.startswith('with')))
+    return stripped.endswith("\\") and not (
+        stripped.startswith("assert") or stripped.startswith("with")
+    )
+
+
+def is_docstring(s):
+    """Tell whether or not a string is a docstring."""
+    return s.startswith("'''") or s.startswith('"""')
 
 
 def is_noqa_line(line):
     """Tell whether or not a line is a NOQA line for this plugin."""
-    stripped = line.strip()
-    return (stripped.endswith('# noqa: {}'.format(ERROR_CODE)) or
-            stripped.endswith('# noqa'))
+    s = line.strip()
+    return s.endswith("# noqa: {}".format(ERROR_CODE)) or s.endswith("# noqa")
 
 
 def is_stdin(name):
@@ -117,14 +126,35 @@ def read_stdin_lines():
 
 def strip_comments(lines):
     """Strip all comments from the source lines."""
-    tokens = generate_tokens(lines)
-    comments = [token for token in tokens if token[0] == tokenize.COMMENT]
+    return strip_with(lambda t: t[0] == tokenize.COMMENT, lines)
+
+
+def strip_docstrings(lines):
+    """Strip all docstrings from the source lines."""
+    return strip_with(lambda t: t[0] == tokenize.STRING and is_docstring(t[1]), lines)
+
+
+def strip_with(predicate, lines):
+    """Strip any tokens that match the given predicate."""
+    tokens = list(generate_tokens(lines))
+    # filter all the tokens based on the predicate
+    filtered = list(filter(predicate, tokens))
+    # copy the lines to modify and return
     stripped = lines[:]
-    for comment in comments:
-        lineno = comment[3][0]
-        start = comment[2][1]
-        stop = comment[3][1]
-        content = stripped[lineno - 1]
-        without_comment = content[:start] + content[stop:]
-        stripped[lineno - 1] = without_comment.rstrip()
+
+    for token in filtered:
+        # grab the starting line number and column number for the token
+        # this is especially important for multiline tokens, e.g docstrings
+        start_lineno = token[2][0] - 1
+        start_colno = token[2][1]
+        # grab the ending line number and column number for the token
+        end_lineno, end_colno = token[3]
+        affected_lines = six.moves.range(start_lineno, end_lineno)
+        for lineno in affected_lines:
+            line = lines[lineno]
+            # remove the token from the given line
+            start = start_colno if lineno == start_lineno else 0
+            end = end_colno if lineno == end_lineno else (len(line) - 1)
+            without_token = line[:start] + line[end:]
+            stripped[lineno] = without_token.rstrip()
     return stripped

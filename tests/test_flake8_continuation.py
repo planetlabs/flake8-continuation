@@ -44,38 +44,44 @@ class ContinuationPluginTestCase(unittest.TestCase):
 
     def run_with_fixture(self, fixture_name):
         """Run the plugin with the given fixture."""
-        path = 'tests/fixtures/{}'.format(fixture_name)
+        path = "tests/fixtures/{}".format(fixture_name)
         plugin = flake8_continuation.ContinuationPlugin(None, path)
         return list(plugin.run())
 
     def test_with(self):
         """Test that with statements can be continued with backslashes."""
-        self.assert_okay('with-statement')
+        self.assert_okay("with-statement")
 
     def test_long_comment(self):
         """Test that full-line comments will pass."""
-        self.assert_okay('long-comment')
+        self.assert_okay("long-comment")
 
     def test_inline_comment(self):
         """Test that inline comments will pass."""
-        self.assert_okay('inline-comment')
+        self.assert_okay("inline-comment")
 
     def test_long_if_expression(self):
         """Test that long expressions with backslashes will fail."""
-        self.assert_not_okay('long-if-expression')
+        self.assert_not_okay("long-if-expression")
 
     def test_long_string_with_backslashes(self):
         """Test that long strings using backslashes will fail."""
-        self.assert_not_okay('long-string-with-backslashes')
+        self.assert_not_okay("long-string-with-backslashes")
 
     def test_noqa(self):
         """Test that noqa comments are honored."""
-        self.assert_okay('noqa')
+        self.assert_okay("noqa")
 
-    @mock.patch('flake8_continuation.pycodestyle.stdin_get_value',
-                new=mock.Mock(return_value='foo = True  # bar\\\n'))
+    @mock.patch(
+        "flake8_continuation.pycodestyle.stdin_get_value",
+        new=mock.Mock(return_value="foo = True  # bar\\\n"),
+    )
     def test_stdin(self):
         """Test that reading from stdin also works."""
         plugin = flake8_continuation.ContinuationPlugin(None)
         actual = list(plugin.run())
         self.assertEqual(actual, [])
+
+    def test_docstring(self):
+        """Test that docstrings with backslashes will pass."""
+        self.assert_okay("docstring")

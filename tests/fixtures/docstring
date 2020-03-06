@@ -1,0 +1,8 @@
+def foo(bar):
+"""A backslash \
+in here \
+is expected \
+to be \
+allowed.
+"""
+    return baz + bar

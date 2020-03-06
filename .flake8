@@ -1,7 +1,8 @@
 [flake8]
-exclude = .git, __pycache__, docs/conf.py
-max-complexity = 7
+benchmark = True
 disable-noqa = True
 doctests = True
-benchmark = True
-import-order-style = pep8
+exclude = .git, __pycache__, docs/conf.py
+import-order-style = pycharm
+max-line-length = 88
+max-complexity = 7
