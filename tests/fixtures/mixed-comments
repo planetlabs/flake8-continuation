@@ -1,0 +1,9 @@
+shenanigans = [
+    # hello
+    "world",
+    # foo
+    "bar",
+    "baz",
+    # explosions
+    boom
+]

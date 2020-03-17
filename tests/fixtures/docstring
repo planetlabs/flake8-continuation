@@ -6,3 +6,11 @@ to be \
 allowed.
 """
     return baz + bar
+
+def hello():
+"""
+
+Print "world".
+
+"""
+    print("world")

@@ -156,5 +156,7 @@ def strip_with(predicate, lines):
             start = start_colno if lineno == start_lineno else 0
             end = end_colno if lineno == end_lineno else (len(line) - 1)
             without_token = line[:start] + line[end:]
-            stripped[lineno] = without_token.rstrip()
+            # if the stripped line is now empty, make it a newline
+            # leaving it as the empty string will generate tokenizing errors
+            stripped[lineno] = without_token.rstrip() or "\n"
     return stripped

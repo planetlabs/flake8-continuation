@@ -85,3 +85,7 @@ class ContinuationPluginTestCase(unittest.TestCase):
     def test_docstring(self):
         """Test that docstrings with backslashes will pass."""
         self.assert_okay("docstring")
+
+    def test_mixed_comments(self):
+        """Test that comments mixed between statements will pass."""
+        self.assert_okay("mixed-comments")

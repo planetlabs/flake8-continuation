@@ -46,7 +46,7 @@ setuptools.setup(
     description="Flake8 Line Continuation Plugin",
     long_description=get_long_description(),
     license="Apache 2.0",
-    version="1.0.4",
+    version="1.0.5",
     install_requires=["flake8", "pycodestyle", "six"],
     provides=["flake8_continuation"],
     py_modules=["flake8_continuation"],
